@@ -72,7 +72,7 @@
             // Filtra as imagens
             const imageUrls = data.files
                 .filter(file => file.mimeType.startsWith("image/"))
-                .map(file => `https://drive.google.com/uc?export=view&id=${file.id}`);
+                .map(file => `https://drive.google.com/uc?id=${file.id}`); // URL alterada
 
             console.log("URLs das imagens:", imageUrls);  // Log para depuração
             return imageUrls;
