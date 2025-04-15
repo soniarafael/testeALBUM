@@ -52,21 +52,28 @@
         const url = `https://www.googleapis.com/drive/v3/files?q='${folderID}'+in+parents&key=${apiKey}&fields=files(id,name,mimeType)`;
 
         try {
+            // Fazendo a requisição à API do Google Drive
             const response = await fetch(url);
-            const data = await response.json();
-            console.log(data);  // Log para depuração
+            
+            if (!response.ok) {
+                console.error('Erro na requisição da API:', response.statusText);
+                return [];
+            }
 
-            if (!data || !data.files || data.files.length === 0) {
+            const data = await response.json();
+            console.log('Resposta da API:', data);  // Log para depuração
+
+            if (!data.files || data.files.length === 0) {
                 console.error('Nenhuma imagem encontrada na pasta');
                 return [];
             }
 
-            // Filtra apenas as imagens
+            // Filtra as imagens
             const imageUrls = data.files
                 .filter(file => file.mimeType.startsWith("image/"))
                 .map(file => `https://drive.google.com/uc?export=view&id=${file.id}`);
 
-            console.log("Imagens encontradas:", imageUrls);  // Log das URLs para depuração
+            console.log("URLs das imagens:", imageUrls);  // Log para depuração
             return imageUrls;
 
         } catch (error) {
@@ -100,7 +107,7 @@
     // Função para iniciar o slideshow
     async function startSlideshow() {
         const images = await fetchImagesFromDrive(folderID);
-        
+
         if (images.length > 0) {
             loadImage(currentIndex, images);
             setInterval(() => nextImage(images), 3000); // Troca a imagem a cada 3 segundos
@@ -109,7 +116,7 @@
         }
     }
 
-    // Começa o slideshow assim que a página carrega
+    // Inicia o slideshow assim que a página carregar
     startSlideshow();
 </script>
 
