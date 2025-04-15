@@ -54,6 +54,7 @@
         try {
             const response = await fetch(url);
             const data = await response.json();
+            console.log(data);  // Log para depuração
 
             if (!data || !data.files || data.files.length === 0) {
                 console.error('Nenhuma imagem encontrada na pasta');
@@ -65,6 +66,7 @@
                 .filter(file => file.mimeType.startsWith("image/"))
                 .map(file => `https://drive.google.com/uc?export=view&id=${file.id}`);
 
+            console.log("Imagens encontradas:", imageUrls);  // Log das URLs para depuração
             return imageUrls;
 
         } catch (error) {
@@ -79,9 +81,14 @@
     function loadImage(index, images) {
         const img = document.createElement('img');
         img.src = images[index];
-        slideshow.innerHTML = ''; // Limpa imagens anteriores
-        slideshow.appendChild(img);
-        img.classList.add('visible');
+        img.onload = () => {
+            slideshow.innerHTML = ''; // Limpa imagens anteriores
+            slideshow.appendChild(img);
+            img.classList.add('visible');
+        };
+        img.onerror = () => {
+            console.error('Erro ao carregar a imagem', img.src);
+        };
     }
 
     // Função para passar para a próxima imagem
