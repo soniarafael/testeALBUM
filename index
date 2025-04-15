@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slideshow do Casamento</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #slideshow {
+            width: 80%;
+            max-width: 800px;
+            height: 500px;
+            overflow: hidden;
+            position: relative;
+        }
+        #slideshow img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+        .visible {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+<div id="slideshow"></div>
+
+<script>
+    const slideshow = document.getElementById('slideshow');
+    const folderId = '1HiWb4HND3lWIMuG9tWD6-Og__y2btaP5'; // ID da sua pasta no Google Drive
+
+    // Função para buscar as fotos da pasta do Google Drive
+    async function fetchImagesFromDrive(folderId) {
+        const API_KEY = 'AIzaSyCbR_Qz8ijrNrhexu-G19zdgHwOWd4R2lc'; // Obtenha uma chave de API do Google
+        const url = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents&key=${API_KEY}`;
+        
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            const imageUrls = data.files.map(file => {
+                return `https://drive.google.com/uc?export=view&id=${file.id}`;
+            });
+            return imageUrls;
+        } catch (error) {
+            console.error('Erro ao carregar as imagens:', error);
+        }
+    }
+
+    let currentIndex = 0;
+
+    // Função para carregar uma imagem no slideshow
+    function loadImage(index, images) {
+        const img = document.createElement('img');
+        img.src = images[index];
+        slideshow.innerHTML = ''; // Limpa imagens anteriores
+        slideshow.appendChild(img);
+        img.classList.add('visible');
+    }
+
+    // Função para passar para a próxima imagem
+    function nextImage(images) {
+        currentIndex = (currentIndex + 1) % images.length;
+        loadImage(currentIndex, images);
+    }
+
+    // Função para iniciar o slideshow
+    async function startSlideshow() {
+        const images = await fetchImagesFromDrive(folderId);
+        if (images && images.length > 0) {
+            loadImage(currentIndex, images);
+            setInterval(() => nextImage(images), 3000); // Troca a imagem a cada 3 segundos
+        } else {
+            console.error('Nenhuma imagem encontrada na pasta');
+        }
+    }
+
+    startSlideshow();
+</script>
+
+</body>
+</html>
