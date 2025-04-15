@@ -40,22 +40,32 @@
 
 <script>
     const slideshow = document.getElementById('slideshow');
-    const folderId = '1HiWb4HND3lWIMuG9tWD6-Og__y2btaP5'; // ID da sua pasta no Google Drive
+    const folderID = '1HiWb4HND3lWIMuG9tWD6-Og__y2btaP5';  // ID da sua pasta do Google Drive
+    const apiKey = 'AIzaSyCbR_Qz8ijrNrhexu-G19zdgHwOWd4R2lc';  // Substitua pela sua chave de API
 
     // Função para buscar as fotos da pasta do Google Drive
-    async function fetchImagesFromDrive(folderId) {
-        const API_KEY = 'AIzaSyCbR_Qz8ijrNrhexu-G19zdgHwOWd4R2lc'; // Obtenha uma chave de API do Google
-        const url = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents&key=${API_KEY}`;
-        
+    async function fetchImagesFromDrive(folderID) {
+        const url = `https://www.googleapis.com/drive/v3/files?q='${folderID}'+in+parents&key=${apiKey}&fields=files(id,name,mimeType)`;
+
         try {
             const response = await fetch(url);
             const data = await response.json();
-            const imageUrls = data.files.map(file => {
-                return `https://drive.google.com/uc?export=view&id=${file.id}`;
-            });
+
+            // Verifica se a resposta contém arquivos
+            if (!data || !data.files || data.files.length === 0) {
+                console.error('Nenhuma imagem encontrada na pasta');
+                return [];
+            }
+
+            // Filtra os arquivos de imagem e cria os links de visualização
+            const imageUrls = data.files
+                .filter(file => file.mimeType.startsWith("image/"))
+                .map(file => `https://drive.google.com/uc?export=view&id=${file.id}`);
             return imageUrls;
+
         } catch (error) {
             console.error('Erro ao carregar as imagens:', error);
+            return [];
         }
     }
 
@@ -78,12 +88,13 @@
 
     // Função para iniciar o slideshow
     async function startSlideshow() {
-        const images = await fetchImagesFromDrive(folderId);
-        if (images && images.length > 0) {
+        const images = await fetchImagesFromDrive(folderID);
+        
+        if (images.length > 0) {
             loadImage(currentIndex, images);
             setInterval(() => nextImage(images), 3000); // Troca a imagem a cada 3 segundos
         } else {
-            console.error('Nenhuma imagem encontrada na pasta');
+            console.error('Não há imagens para exibir');
         }
     }
 
