@@ -55,6 +55,7 @@
             // Fazendo a requisição à API do Google Drive
             const response = await fetch(url);
             
+            // Verificação de erro de rede
             if (!response.ok) {
                 console.error('Erro na requisição da API:', response.statusText);
                 return [];
